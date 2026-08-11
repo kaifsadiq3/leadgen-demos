@@ -1,0 +1,19 @@
+name: LeadGen Railway Health Check
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Railway service
+        env:
+          LEADGEN_RAILWAY_DOMAIN: ${{ secrets.LEADGEN_RAILWAY_DOMAIN }}
+        run: |
+          set -e
+          test -n "$LEADGEN_RAILWAY_DOMAIN"
+          curl --fail --silent --show-error --max-time 20             "https://${LEADGEN_RAILWAY_DOMAIN}/health" | tee /tmp/health.json
+          grep -q '"status":"ok"' /tmp/health.json
